@@ -53,7 +53,7 @@ target_link_libraries(async_app
   async
   )
 
-install(TARGETS async RUNTIME DESTINATION bin)
+install(TARGETS async_app RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 

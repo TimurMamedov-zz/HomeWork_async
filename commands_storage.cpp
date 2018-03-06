@@ -45,6 +45,12 @@ CommandsStorage::~CommandsStorage()
               << solvers[1]->getBlocksCount() << " blocks" << std::endl;
 }
 
+CommandsStorage &CommandsStorage::getInstance()
+{
+    static CommandsStorage commandStorage;
+    return commandStorage;
+}
+
 void CommandsStorage::addString(handle_type handle, const std::string& str)
 {
     if(connections.find(handle) != connections.end())
@@ -72,6 +78,7 @@ void CommandsStorage::Disconnect(handle_type handle)
 {
     if(connections.find(handle) != connections.end())
     {
+        forcing_push(handle);
         connections.erase(handle);
         bulk_sizes.erase(handle);
         firstBulkTimes.erase(handle);
