@@ -1,4 +1,5 @@
 #include "async.h"
+#include "commands_storage.h"
 
 namespace async
 {

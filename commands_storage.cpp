@@ -2,10 +2,9 @@
 #include "solvers.h"
 #include <thread>
 
-CommandsStorage::CommandsStorage(std::size_t bulkSize)
-    : file_queue(cond_var_file, finish), log_queue(cond_var_log, finish), bulkSize_(bulkSize)
+CommandsStorage::CommandsStorage()
+    : file_queue(cond_var_file, finish), log_queue(cond_var_log, finish)
 {
-    commandsVector.reserve(bulkSize_);
     solvers.reserve(3);
     threads.reserve(3);
     finish.store(false);
@@ -46,62 +45,86 @@ CommandsStorage::~CommandsStorage()
               << solvers[1]->getBlocksCount() << " blocks" << std::endl;
 }
 
-void CommandsStorage::addString(const std::string& str)
+void CommandsStorage::addString(handle_type handle, const std::string& str)
 {
-    if(str == "{" || str == "}")
-        addBracket(str);
-    else
-        addCommand(str);
-
-    stringsCount++;
-}
-
-void CommandsStorage::addCommand(const std::string& command)
-{
-    if(commandsVector.empty())
-        firstBulkTime = std::chrono::system_clock::now();
-
-    commandsVector.push_back(command);
-    if((commandsVector.size() >= bulkSize_) && bracketStack.empty())
+    if(connections.find(handle) != connections.end())
     {
-        queues_push();
+        if(str == "{" || str == "}")
+            addBracket(handle, str);
+        else
+            addCommand(handle, str);
+
+        stringsCount++;
     }
 }
 
-void CommandsStorage::queues_push()
+void CommandsStorage::addConnection(handle_type handle, std::size_t bulk_size)
+{
+    if(connections.find(handle) == connections.end())
+    {
+        connections.emplace(handle,
+                            connection_type(std::stack<std::string>(), std::vector<std::string>()));
+        bulk_sizes.emplace(handle,  bulk_size);
+    }
+}
+
+void CommandsStorage::Disconnect(handle_type handle)
+{
+    if(connections.find(handle) != connections.end())
+    {
+        connections.erase(handle);
+        bulk_sizes.erase(handle);
+        firstBulkTimes.erase(handle);
+    }
+}
+
+void CommandsStorage::addCommand(handle_type handle, const std::string& command)
+{
+    if(connections[handle].second.empty())
+        firstBulkTimes[handle] = std::chrono::system_clock::now();
+
+    connections[handle].second.push_back(command);
+    if((connections[handle].second.size() >= bulk_sizes[handle]) &&
+            connections[handle].first.empty() )
+    {
+        queues_push(handle);
+    }
+}
+
+void CommandsStorage::queues_push(handle_type handle)
 {
     file_queue.push(std::pair<std::vector<std::string>,
-                    std::chrono::system_clock::time_point>(commandsVector, firstBulkTime));
-    log_queue.push(commandsVector);
+                    std::chrono::system_clock::time_point>(connections[handle].second, firstBulkTimes[handle]));
+    log_queue.push(connections[handle].second);
 
-    commandsCount += commandsVector.size();
+    commandsCount += connections[handle].second.size();
     blocksCount++;
 
-    commandsVector.clear();
+    connections[handle].second.clear();
 }
 
-void CommandsStorage::forcing_push()
+void CommandsStorage::forcing_push(handle_type handle)
 {
-    if(bracketStack.empty() && commandsVector.size())
+    if(connections[handle].first.empty() && connections[handle].second.size())
     {
-        queues_push();
+        queues_push(handle);
     }
 }
 
-void CommandsStorage::addBracket(const std::string& bracket)
+void CommandsStorage::addBracket(handle_type handle, const std::string& bracket)
 {
     if(bracket == "{")
     {
-        forcing_push();
+        forcing_push(handle);
 
-        bracketStack.push(bracket);
+        connections[handle].first.push(bracket);
     }
     else if(bracket == "}")
     {
-        if(!bracketStack.empty())
-            if(bracketStack.top() == "{")
-                bracketStack.pop();
+        if(!connections[handle].first.empty())
+            if(connections[handle].first.top() == "{")
+                connections[handle].first.pop();
 
-        forcing_push();
+        forcing_push(handle);
     }
 }
