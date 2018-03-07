@@ -9,13 +9,9 @@ CommandsStorage::CommandsStorage()
     threads.reserve(3);
     finish.store(false);
 
-    auto autoSavingSolver1 = std::make_unique<SaveSolver>(file_queue);
-    auto autoSavingSolver2 = std::make_unique<SaveSolver>(file_queue);
-    auto autoPrintSolver = std::make_unique<PrintSolver>(log_queue);
-
-    solvers.emplace_back(std::move(autoSavingSolver1));
-    solvers.emplace_back(std::move(autoSavingSolver2));
-    solvers.emplace_back(std::move(autoPrintSolver));
+    solvers.emplace_back(std::make_unique<SaveSolver>(file_queue));
+    solvers.emplace_back(std::make_unique<SaveSolver>(file_queue));
+    solvers.emplace_back(std::make_unique<PrintSolver>(log_queue));
 
     std::thread file1(std::ref(*solvers[0])),
             file2(std::ref(*solvers[1])),
@@ -45,12 +41,6 @@ CommandsStorage::~CommandsStorage()
               << solvers[1]->getBlocksCount() << " blocks" << std::endl;
 }
 
-CommandsStorage &CommandsStorage::getInstance()
-{
-    static CommandsStorage commandStorage;
-    return commandStorage;
-}
-
 void CommandsStorage::addString(handle_type handle, const std::string& str)
 {
     if(connections.find(handle) != connections.end())
@@ -70,7 +60,7 @@ void CommandsStorage::addConnection(handle_type handle, std::size_t bulk_size)
     {
         connections.emplace(handle,
                             connection_type(std::stack<std::string>(), std::vector<std::string>()));
-        bulk_sizes.emplace(handle,  bulk_size);
+        bulk_sizes.emplace(handle, bulk_size);
     }
 }
 
@@ -91,6 +81,7 @@ void CommandsStorage::addCommand(handle_type handle, const std::string& command)
         firstBulkTimes[handle] = std::chrono::system_clock::now();
 
     connections[handle].second.push_back(command);
+
     if((connections[handle].second.size() >= bulk_sizes[handle]) &&
             connections[handle].first.empty() )
     {
@@ -112,7 +103,8 @@ void CommandsStorage::queues_push(handle_type handle)
 
 void CommandsStorage::forcing_push(handle_type handle)
 {
-    if(connections[handle].first.empty() && connections[handle].second.size())
+    if(connections[handle].first.empty() &&
+            connections[handle].second.size())
     {
         queues_push(handle);
     }

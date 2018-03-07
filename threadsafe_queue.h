@@ -22,7 +22,7 @@ public:
     void push(T new_value)
     {
         std::lock_guard<std::mutex> lk(mt);
-        queue.push(new_value);
+        queue.emplace(std::move(new_value));
         data_cond.notify_all();
     }
 

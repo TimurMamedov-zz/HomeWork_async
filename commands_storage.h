@@ -20,24 +20,22 @@
 #include "threadsafe_queue.h"
 
 using connection_type = std::pair<std::stack<std::string>, std::vector<std::string> >;
-using handle_type = std::size_t;
+using handle_type = void*;
 using bulk_size_type = std::size_t;
 
 class CommandsStorage
 {
 public:
+    explicit CommandsStorage();
     CommandsStorage(const CommandsStorage&) = delete;
     CommandsStorage& operator =(const CommandsStorage&) = delete;
     ~CommandsStorage();
-    static CommandsStorage& getInstance();
     void addString(handle_type handle, const std::string& str);
     void addConnection(handle_type handle, std::size_t bulk_size);
     void Disconnect(handle_type handle);
 
-    void forcing_push(handle_type handle);
-
 private:
-    explicit CommandsStorage();
+
     std::unordered_map<handle_type, connection_type> connections;
     std::unordered_map<handle_type, bulk_size_type> bulk_sizes;
     std::unordered_map<handle_type, std::chrono::system_clock::time_point> firstBulkTimes;
@@ -60,4 +58,5 @@ private:
     void addCommand(handle_type handle,const std::string& command);
     void addBracket(handle_type handle,const std::string& bracket);
     void queues_push(handle_type handle);
+    void forcing_push(handle_type handle);
 };

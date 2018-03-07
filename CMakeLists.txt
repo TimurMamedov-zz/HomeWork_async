@@ -50,6 +50,10 @@ target_link_libraries(async
   )
 
 target_link_libraries(async_app
+  ${CMAKE_THREAD_LIBS_INIT}
+  )
+
+target_link_libraries(async_app
   async
   )
 

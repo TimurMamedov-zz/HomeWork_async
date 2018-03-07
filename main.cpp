@@ -2,10 +2,14 @@
 
 #include "async.h"
 
-int main(int, char *[]) {
+int main(int, char *[])
+{
     std::size_t bulk = 5;
     auto h = async::connect(bulk);
+    std::cout << "h " << h << std::endl;
+
     auto h2 = async::connect(bulk);
+    std::cout << "h2 " << h2 << std::endl;
     async::receive(h, "1", 1);
     async::receive(h2, "1\n", 2);
     async::receive(h, "\n2\n3\n4\n5\n6\n{\na\n", 15);
