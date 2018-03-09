@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 
 if(DEFINED ENV{TRAVIS_BUILD_NUMBER})
-    project(async_app VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
+    project(async VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 else()
-    project(async_app VERSION 0.0.1)
+    project(async VERSION 0.0.1)
 endif()
 
 find_package(Threads)
@@ -21,12 +21,12 @@ add_library(async SHARED
     ${SOURCES}
 )
 
-add_executable(async_app async.h main.cpp)
+#add_executable(async_app async.h main.cpp)
 
 #set (TEST test_bulk)
 #add_executable (${TEST} test_bulk.cpp)
 
-set_target_properties (async_app async PROPERTIES
+set_target_properties (async PROPERTIES
         CXX_STANDARD 14
         CXX_STANDARD_REQUIRED ON
         COMPILE_OPTIONS -Wpedantic -Wall -Wextra
@@ -49,15 +49,22 @@ target_link_libraries(async
   ${CMAKE_THREAD_LIBS_INIT}
   )
 
-target_link_libraries(async_app
-  ${CMAKE_THREAD_LIBS_INIT}
-  )
+#target_link_libraries(async_app
+#  ${CMAKE_THREAD_LIBS_INIT}
+#  )
 
-target_link_libraries(async_app
-  async
-  )
+#target_link_libraries(async_app
+#  async
+#  )
 
-install(TARGETS async_app RUNTIME DESTINATION bin)
+#install(TARGETS async_app RUNTIME DESTINATION bin)
+
+INSTALL(
+  TARGETS async
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  COMPONENT library
+)
 
 set(CPACK_GENERATOR DEB)
 
