@@ -12,19 +12,19 @@ install:
   - sudo apt-get install -qq g++-6
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
 
-#before_script:
-#- sudo apt-get install doxygen -y
-#- sudo apt-get install graphviz -y
-#- sudo apt-get install libboost-test-dev -y
-#- sudo apt-get install libboost-program-options-dev -y
-#- echo "deb http://archive.ubuntu.com/ubuntu xenial main universe" | sudo tee -a /etc/apt/sources.list
+before_script:
+- sudo apt-get install doxygen -y
+- sudo apt-get install graphviz -y
+- sudo apt-get install libboost-test-dev -y
+- sudo apt-get install libboost-program-options-dev -y
+- echo "deb http://archive.ubuntu.com/ubuntu xenial main universe" | sudo tee -a /etc/apt/sources.list
 
 script:
 - cmake .
 - cmake --build .
 #- cmake --build . --target test
 - cmake --build . --target package
-#- doxygen doxygen.dox
+- doxygen doxygen.dox
 
 deploy:
   - provider: script
@@ -32,10 +32,10 @@ deploy:
     script:
       - curl -T async-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb -utimurmamedov-zz:$BINTRAY_API_KEY "https://api.bintray.com/content/timurmamedov-zz/OTUS_HomeWorks/HomeWork_async/$TRAVIS_BUILD_NUMBER/async-0.0.$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
   
-#  - provider: pages
-#    skip-cleanup: true
-#    local_dir: /html
-#    github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
-#    keep-history: true
-#    on:
-#      branch: master
+  - provider: pages
+    skip-cleanup: true
+    local_dir: /html
+    github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+    keep-history: true
+    on:
+      branch: master
