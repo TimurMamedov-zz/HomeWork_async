@@ -11,7 +11,7 @@ find_package(Threads)
 #set(Boost_USE_STATIC_RUNTIME ON)
 #find_package(Boost COMPONENTS unit_test_framework program_options REQUIRED)
 
-configure_file(version.h.in version.h)
+#configure_file(version.h.in version.h)
 
 set(HEADERS commands_storage.h threadsafe_queue.h solver.h solvers.h exeption_class.h async.h)
 set(SOURCES commands_storage.cpp solvers.cpp async.cpp)
