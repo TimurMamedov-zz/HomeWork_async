@@ -13,7 +13,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
-#include <unordered_map>
+#include <map>
 #include <condition_variable>
 
 #include "solver.h"
@@ -36,9 +36,9 @@ public:
 
 private:
 
-    std::unordered_map<handle_type, connection_type> connections;
-    std::unordered_map<handle_type, bulk_size_type> bulk_sizes;
-    std::unordered_map<handle_type, std::chrono::system_clock::time_point> firstBulkTimes;
+    std::map<handle_type, connection_type> connections;
+    std::map<handle_type, bulk_size_type> bulk_sizes;
+    std::map<handle_type, std::chrono::system_clock::time_point> firstBulkTimes;
 
     std::vector<std::thread> threads;
     std::vector<std::unique_ptr<Solver> > solvers;

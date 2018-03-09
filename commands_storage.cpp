@@ -97,7 +97,6 @@ void CommandsStorage::queues_push(handle_type handle)
 
     commandsCount += connections[handle].second.size();
     blocksCount++;
-
     connections[handle].second.clear();
 }
 
