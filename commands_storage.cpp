@@ -1,6 +1,7 @@
 #include "commands_storage.h"
 #include "solvers.h"
 #include <thread>
+#include <assert.h>
 
 CommandsStorage::CommandsStorage()
     : file_queue(cond_var_file, finish), log_queue(cond_var_log, finish)
@@ -8,6 +9,9 @@ CommandsStorage::CommandsStorage()
     solvers.reserve(3);
     threads.reserve(3);
     finish.store(false);
+    commandsCount.store(0);
+    blocksCount.store(0);
+    stringsCount.store(0);
 
     solvers.emplace_back(std::make_unique<SaveSolver>(file_queue));
     solvers.emplace_back(std::make_unique<SaveSolver>(file_queue));
@@ -39,6 +43,7 @@ CommandsStorage::~CommandsStorage()
               << solvers[0]->getBlocksCount() << " blocks" << std::endl;
     std::cout << "file2 thread - " << solvers[1]->getCommandsCount() << " commands, "
               << solvers[1]->getBlocksCount() << " blocks" << std::endl;
+    assert(solvers[2]->getCommandsCount() == commandsCount);
 }
 
 void CommandsStorage::addString(handle_type handle, const std::string& str)

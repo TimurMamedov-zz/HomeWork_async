@@ -47,9 +47,9 @@ private:
     std::condition_variable cond_var_file;
 
 
-    std::size_t commandsCount = 0;
-    std::size_t blocksCount = 0;
-    std::size_t stringsCount = 0;
+    std::atomic_size_t commandsCount;
+    std::atomic_size_t blocksCount;
+    std::atomic_size_t stringsCount;
 
     ThreadSave_Queue<std::pair< std::vector<std::string>,
         std::chrono::system_clock::time_point> > file_queue;
