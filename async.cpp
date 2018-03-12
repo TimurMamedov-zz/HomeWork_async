@@ -44,7 +44,7 @@ void receive(handle_t handle_, const char *data, std::size_t size)
             {
                 str += data[i];
             }
-            else if(str != "")
+            else
             {
                 commandStorage.addString(handle_, str);
                 str = "";
