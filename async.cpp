@@ -8,7 +8,7 @@
 #include "commands_storage.h"
 
 static std::list<std::mutex> handle_list;
-static std::map<handle_type, std::string> string_map;
+static std::map<handle_type, std::pair<bool, std::string> > string_map; //bool for last empty string(disconnect)
 static CommandsStorage commandStorage;
 static std::shared_timed_mutex commonMutex;
 
@@ -22,7 +22,7 @@ handle_t connect(std::size_t bulk)
         throw Exception("Too much connections!");
     handle_list.emplace_back();
     auto handle = reinterpret_cast<void*>(&handle_list.back());
-    string_map.emplace(handle, "");
+    string_map.emplace(handle, std::pair<bool, std::string>(false, ""));
     commandStorage.addConnection(handle, bulk);
     return handle;
 }
@@ -35,8 +35,8 @@ void receive(handle_t handle_, const char *data, std::size_t size)
     {
         std::lock_guard<std::mutex> inner_lock(*reinterpret_cast<std::mutex*>(handle_));
         std::string str;
-        str += item->second;
-        item->second = "";
+        str += item->second.second;
+        item->second.second = "";
         std::size_t i = 0;
         while(data[i])
         {
@@ -51,8 +51,13 @@ void receive(handle_t handle_, const char *data, std::size_t size)
             }
             i++;
         }
+
         if(str != "")
-            item->second = str;
+            item->second.second = str;
+        else if(data[0] == '\0')
+            item->second.first = true;
+        else if(item->second.first)
+            item->second.first = false;
     }
 }
 
@@ -62,10 +67,11 @@ void disconnect(handle_t handle_)
     auto item = string_map.find(handle_);
     if(item != string_map.end())
     {
-        if(item->second != "")
-        {
-            commandStorage.addString(handle_, string_map[handle_]);
-        }
+        if(item->second.second != "")
+            commandStorage.addString(handle_, string_map[handle_].second);
+        else if(item->second.first)//if exist last empty string
+            commandStorage.addString(handle_, string_map[handle_].second);
+
         commandStorage.Disconnect(handle_);
         string_map.erase(item);
 
