@@ -55,7 +55,7 @@ void receive(handle_t handle_, const char *data, std::size_t size)
             item->second.second = str;
         else if(size && data[0] == '\0')
             item->second.first = true;
-        else if(size && item->second.first)
+        else if(item->second.first)
             item->second.first = false;
     }
 }
