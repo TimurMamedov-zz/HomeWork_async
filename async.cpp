@@ -48,7 +48,6 @@ void receive(handle_t handle_, const char *data, std::size_t size)
                 commandStorage.addString(handle_, str);
                 str = "";
             }
-            i++;
         }
 
         if(str != "")
