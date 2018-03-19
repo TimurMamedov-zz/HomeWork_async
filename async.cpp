@@ -37,8 +37,7 @@ void receive(handle_t handle_, const char *data, std::size_t size)
         std::string str;
         str += item->second.second;
         item->second.second = "";
-        std::size_t i = 0;
-        while(data[i])
+        for(std::size_t i = 0; i < size; i++)
         {
             if(data[i] != '\n')
             {
@@ -54,7 +53,7 @@ void receive(handle_t handle_, const char *data, std::size_t size)
 
         if(str != "")
             item->second.second = str;
-        else if(data[0] == '\0')
+        else if(size && data[0] == '\0')
             item->second.first = true;
         else if(item->second.first)
             item->second.first = false;
