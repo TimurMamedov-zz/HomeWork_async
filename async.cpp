@@ -21,7 +21,7 @@ handle_t connect(std::size_t bulk)
     if(handle_list.size() == handle_list.max_size())
         throw Exception("Too much connections!");
     handle_list.emplace_back();
-    auto handle = reinterpret_cast<void*>(&handle_list.back());
+    auto handle = static_cast<void*>(&handle_list.back());
     string_map.emplace(handle, std::pair<bool, std::string>(false, ""));
     commandStorage.addConnection(handle, bulk);
     return handle;
@@ -33,7 +33,7 @@ void receive(handle_t handle_, const char *data, std::size_t size)
     auto item = string_map.find(handle_);
     if(item != string_map.end())
     {
-        std::lock_guard<std::mutex> inner_lock(*reinterpret_cast<std::mutex*>(handle_));
+        std::lock_guard<std::mutex> inner_lock(*static_cast<std::mutex*>(handle_));
         std::string str;
         str += item->second.second;
         item->second.second = "";
